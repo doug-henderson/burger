@@ -1,45 +1,28 @@
-var express = require("express");
-
+var express = require('express');
 var router = express.Router();
+var queries = require('../models/burger.js');
 
-// Import the model (burger.js) to use its database functions.
-var burger = require("../models/burger.js");
-
-// Create all our routes and set up logic within those routes where required.
-router.get("/", function(req, res) {
-  burger.all(function(data) {
-    var hbsObject = {
-      burgers: data
-    };
-    console.log(hbsObject);
-    res.render("index", hbsObject);
-  });
+router.get('/', function (req, res) {
+    queries.show(function(data){
+        //console.log(data);
+        var data1 = {
+            burgerData: data
+        }
+        //res.render('index', {data : data});
+        res.render('index', data1);
+    });
 });
 
-router.post("/burger/create", function(req, res) {
-  burger.create(req.body.name, function(result) {
-    console.log(result)
-    res.redirect("/");
-  });
+router.post('/create', function (req, res) {
+    queries.add(req.body.item, function(data) {
+        res.redirect('/');
+    });
 });
 
-//getting ID from index input
-router.put("/burgers/eat", function(req, res) {
-  burger.eat(req.body.burger_id, function(result){
-    console.log(result);
-    res.redirect("/");
-  });
+router.post('/update/:id', function (req, res) {
+    queries.eat(req.params.id, function(data) {
+        res.redirect('/');
+    });
 });
 
-
-//getting ID from index input
-router.put("/burgers/update", function(req, res) {
-  burger.update(req.body.burger_id, function(result){
-    console.log(result);
-    res.redirect("/");
-  });
-});
-
-
-// Export routes for server.js to use.
 module.exports = router;

@@ -1,51 +1,36 @@
+var connection = require("../config/connection.js");
 
-
-var connection = require('./connection.js');
-
-function objToSql(ob) {
-	// column1=value, column2=value2,...
-	var arr = [];
-
-	for (var key in ob) {
-		if (ob.hasOwnProperty(key)) {
-			arr.push(key + '=' + ob[key]);
-		}
-	}
-
-	return arr.toString();
-}
+connection.connect(function(err) {
+  if(err) {
+    console.log("Error", err.stack);
+  }
+  console.log("Connected as id: %s", connection.threadId)
+});
 
 var orm = {
-	selectAll: function(table, cb){
-		var queryString = 'SELECT * FROM ' + table + ';';
-		connection.query(queryString, function(err, result){
-			if (err) throw err;
-			cb(result);
-		})
-	},
-	insertOne: function (table, burger_name, cb) {
-		var queryString = "INSERT INTO " + table + " (burger_name) VALUES ('" + burger_name + "')";
-		console.log(queryString);
-		connection.query(queryString, function (err, result) {
-			if (err) throw err;
-			cb(result);
-		});
-	},
-	updateOne: function (table, objColVals, condition, cb) {
-		var queryString = 'UPDATE ' + table;
-
-		queryString = queryString + ' SET ';
-		queryString = queryString + objToSql(objColVals);
-		queryString = queryString + ' WHERE ';
-		queryString = queryString + condition;
-		console.log(condition);
-
-		// console.log(queryString);
-		connection.query(queryString, function (err, result) {
-			if (err) throw err;
-			cb(result);
-		});
-	},
+  addBurger: function(burger, cb) {
+    var burgerName = burger;
+    var mySQLQuery = "INSERT INTO burgers (burger_name) VALUES ('" + burgerName + "')";
+    connection.query(mySQLQuery, function(err, result) {
+      if (err) throw err;
+      cb(result);
+    });
+  },
+  eatBurger: function(burgerId, cb) {
+    var id = burgerId;
+    connection.query("UPDATE burgers SET devoured=1 WHERE id=?", [id], function(err, result) {
+      if (err) throw err;
+      cb(result);
+    });
+  },
+  showBurgers: function(tableName, cb) {
+  connection.query('SELECT * FROM burgers', function(err, result) {
+      if (err) throw err;
+      //console.log("The burger function test :" + result[0].burger_name); 
+      cb(result);
+  });
+ }
 };
 
 module.exports = orm;
+
